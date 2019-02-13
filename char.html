@@ -1,0 +1,86 @@
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.4.2/math.js"></script>
+</head>
+
+<body>
+  <div id="canvasContainer"></div>
+  <div id="otherDiv"></div>
+  <div id="histogram"></div>
+  <canvas id="myChart"></canvas>
+  <script src='./data/result.js'></script>
+  <script>
+    var files = Object.keys(data);
+    var file = files[0];
+    var backgroundColors = [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)'
+    ];
+    var borderColor = [
+        'rgba(255,99,132,1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ]
+    var canvasContainer = document.getElementById('canvasContainer');
+    var traces = files.map(function(file){
+        canvasContainer.insertAdjacentHTML('beforeend', '<h2>Archivo '+file+'</h2><canvas id="'+file+'"></canvas>');
+        var ctx = document.getElementById(file);
+        var labels = [];
+        var y = [];
+        var datasets = [];
+        Object.keys(data[file]).forEach(function(label, index){
+          y.push(math.mean(data[file][label]));
+          labels.push(label + ' loop');
+          data[file][label].forEach(function(elm, index){
+            if(!datasets[index]){
+              datasets[index] = {
+                  label: 'n° '+ (index +1),
+                  data: [],
+                  backgroundColor: backgroundColors[index],
+                  borderColor: borderColor[index],
+                  borderWidth: 1
+              }
+            }
+            datasets[index].data.push(elm);
+          });
+        });
+        datasets.push({
+          label: 'Promedio',
+          data: y,
+          type: 'line',
+          borderColor: borderColor[4],
+
+        })
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                scales: {
+                  yAxes: [{
+                    stacked: true,
+                    ticks: {
+                      beginAtZero: true
+                    }
+                  }],
+                  xAxes: [{
+                    stacked: true,
+                    ticks: {
+                      beginAtZero: true
+                    }
+                  }]
+                }
+            }
+        });
+  });
+</script>
+</body>

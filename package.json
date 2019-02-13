@@ -1,0 +1,30 @@
+{
+  "name": "test-runner",
+  "version": "0.0.1",
+  "description": "test runner",
+  "main": "runner.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "mongoose": "^5.4.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/ivanhuay/test-runner.git"
+  },
+  "keywords": [
+    "test",
+    "runner"
+  ],
+  "author": "ivanhuay@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/ivanhuay/test-runner/issues"
+  },
+  "homepage": "https://gitlab.com/ivanhuay/test-runner#README"
+}

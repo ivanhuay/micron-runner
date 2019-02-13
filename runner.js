@@ -6,16 +6,18 @@ const rowSizeTest = 4;
 const files = fs.readdirSync(testFolder);
 console.log('files: ', JSON.stringify(files));
 const startPoint = 100;
-const endPoint = 1000000;
-
+const endPoint = 3100;
+const step = 500
 function runTest(file, arg){
   return new Promise((resolve, reject)=>{
+    console.log(`starting:${file} ${arg}`);
     exec(`node ${file} ${arg}`, (error, stdout, stderr) => {
       if (error) {
         reject(`exec error: ${error}`);
         return;
       }
       let time = Number(stdout.replace('time: ', '').replace('ms',''));
+      console.log(`end: ${file} ${arg}`);
       resolve(time);
     });
   });
@@ -33,7 +35,7 @@ async function runner(){
   let response = {};
   for(let currentFile of files){
     let file = `${testFolder}${currentFile}`;
-    for(var i = startPoint; i <= endPoint; i*=10){
+    for(var i = startPoint; i <= endPoint; i+=step){
       let j = i;
       let testResponse = await rowRunner(file, j, rowSizeTest);
       if(!response[file]){

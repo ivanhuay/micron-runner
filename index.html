@@ -1,5 +1,6 @@
 <head>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.4.2/math.min.js"></script>
 </head>
 
 <body>
@@ -15,6 +16,7 @@
       var x = [];
       var y = [];
       Object.keys(data[file]).forEach(function(label, index){
+        console.log(data[file][label]);
         data[file][label].forEach(function(elm){
           y.push(elm);
           x.push(label + ' loop');
