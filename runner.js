@@ -2,11 +2,11 @@
 const { exec } = require('child_process');
 const fs = require('fs');
 const testFolder = './tests/'
-const rowSizeTest = 4;
+const rowSizeTest = 3;
 const files = fs.readdirSync(testFolder);
 console.log('files: ', JSON.stringify(files));
 const startPoint = 100;
-const endPoint = 3100;
+const endPoint = 2100;
 const step = 500
 function runTest(file, arg){
   return new Promise((resolve, reject)=>{
