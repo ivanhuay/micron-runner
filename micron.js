@@ -8,7 +8,7 @@ class Micron{
       startPoint: 100,
       endPoint: 2100,
       step: 500,
-      stepSize: 3,
+      repetitionCount: 3,
       folder: './tests/',
       stepRepeat: 3,
       outDir: './results/'
@@ -21,27 +21,29 @@ class Micron{
     this.files =  fs.readdirSync(this.config.folder);
     console.log('files: ', JSON.stringify(this.files));
   }
-  runTest(file, arg, rowSize) {
-    return new Promise((resolve, reject)=>{
-      console.log(`starting:${file} ${arg}`);
-      exec(`node ${file} ${arg}`, (error, stdout, stderr) => {
-        if (error) {
-          reject(`exec error: ${error}`);
-          return;
-        }
-        let time = Number(stdout.replace('time: ', '').replace('ms',''));
-        console.log(`end: ${file} ${arg}`);
-        resolve(time);
-      });
-    });
-  }
-  async rowRunner(file, arg){
-    const resp = [];
-    for(let j = 0; j  < this.config.stepSize; j++) {
-      let testResponse = await this.runTest(file, arg);
-      resp.push(testResponse);
+  async execTest(testModule, currentStep){
+    if(typeof testModule.beforeAll === 'function'){
+      await testModule.beforeAll();
     }
-    return resp;
+    const startTime = Date.now();
+    for(let i = 0; i < currentStep; i++){
+        await testModule.test();
+    }
+    if(typeof testModule.afterAll === 'function'){
+      await testModule.afterAll();
+    }
+    const endTime = Date.now();
+    return endTime - startTime;
+  }
+  async runLoop(file, currentStep) {
+    console.log('starting: ', file, ' currentStep: ', currentStep);
+    const testModule = require(file);
+    const timeData = [];
+    for(let j = 0; j < this.config.repetitionCount; j++) {
+      const time = await this.execTest(testModule, currentStep);
+      timeData.push(time);
+    }
+    return timeData;
   }
   async run(){
     this.readFiles();
@@ -50,7 +52,7 @@ class Micron{
       let file = `${this.config.folder}${currentFile}`;
       for(var i = this.config.startPoint; i <= this.config.endPoint; i += this.config.step) {
         let j = i;
-        let testResponse = await this.rowRunner(file, j);
+        let testResponse = await this.runLoop(file, j);
         if(!response[file]){
           response[file] = {};
         }
