@@ -1,13 +1,30 @@
 <head>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.4.2/math.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css"
 </head>
 
 <body>
-  <canvas id="fullData"></canvas>
-  <div id="canvasContainer"></div>
-  <div id="otherDiv"></div>
-  <div id="histogram"></div>
+  <div class="container">
+    <div class="row">
+      <div class="column">
+        <h1>Tests results:</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="column">
+        <h2>All test comparision:</h2>
+        <canvas id="fullData"></canvas>
+      </div>
+    </div>
+    <div class="row">
+      <div class="column">
+        <div id="canvasContainer"></div>
+      </div>
+    </div>
+  </div>
   <script src='./data/result.js'></script>
   <script>
     var fullctx = document.getElementById('fullData');
@@ -82,13 +99,13 @@
             options: {
                 scales: {
                   yAxes: [{
-                    stacked: true,
+                    // stacked: true,
                     ticks: {
                       beginAtZero: true
                     }
                   }],
                   xAxes: [{
-                    stacked: true,
+                    // stacked: true,
                     ticks: {
                       beginAtZero: true
                     }
@@ -106,13 +123,13 @@
       options: {
           scales: {
             yAxes: [{
-              stacked: true,
+              // stacked: true,
               ticks: {
                 beginAtZero: true
               }
             }],
             xAxes: [{
-              stacked: true,
+              // stacked: true,
               ticks: {
                 beginAtZero: true
               }

@@ -44,11 +44,11 @@ async function runner(){
       response[file][j] = testResponse;
     }
   }
-  console.log(JSON.stringify(response));
   return response;
 }
 
 function writeResults(data){
+  console.log(JSON.stringify(data));
   fs.writeFileSync('./data/result.js', 'var data = ' + JSON.stringify(data) +  ';');
 }
 
