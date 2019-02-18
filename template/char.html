@@ -1,141 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.4.2/math.js"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
   <link rel="stylesheet" href="https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
   <link rel="stylesheet" href="https://cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css"
+  <title>MicronRunner results</title>
 </head>
-
 <body>
-  <div class="container">
-    <div class="row">
-      <div class="column">
-        <h1>Tests results:</h1>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="column">
+          <h1>Tests results:</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="column">
+          <h2>All test comparision:</h2>
+          <canvas id="fullData"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <div class="column">
+          <div id="canvasContainer"></div>
+        </div>
       </div>
     </div>
-    <div class="row">
-      <div class="column">
-        <h2>All test comparision:</h2>
-        <canvas id="fullData"></canvas>
-      </div>
-    </div>
-    <div class="row">
-      <div class="column">
-        <div id="canvasContainer"></div>
-      </div>
-    </div>
-  </div>
-  <script src='./result.js'></script>
-  <script>
-    var fullctx = document.getElementById('fullData');
-    var fullLabel;
-    var files = Object.keys(data);
-    var file = files[0];
-    var backgroundColors = [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)'
-    ];
-    var borderColor = [
-        'rgba(255,99,132,1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-    ]
-    var fullData = {};
-    var canvasContainer = document.getElementById('canvasContainer');
-    var traces = files.map(function(file, fileIndex){
-        canvasContainer.insertAdjacentHTML('beforeend', '<h2>Archivo '+file+'</h2><canvas id="'+file+'"></canvas>');
-        var ctx = document.getElementById(file);
-        var labels = [];
-        var y = [];
-        var datasets = [];
-        Object.keys(data[file]).forEach(function(label, index){
-          y.push(parseInt(math.mean(data[file][label])));
-          labels.push(label + ' loop');
-          data[file][label].forEach(function(elm, subindex){
-            if(!datasets[subindex]){
-              datasets[subindex] = {
-                  label: 'n° '+ (subindex +1),
-                  data: [],
-                  backgroundColor: backgroundColors[subindex],
-                  borderColor: borderColor[subindex],
-                  borderWidth: 1
-              }
-            }
-            datasets[subindex].data.push(elm);
-          });
-        });
-        if(!fullLabel){
-          fullLabel = labels;
-        }
-        if(!fullData[file]){
-          fullData[file] = {
-              label: file,
-              data: y,
-              backgroundColor: backgroundColors[fileIndex],
-              borderColor: borderColor[fileIndex],
-              borderWidth: 1
-          }
-        }
-        datasets.push({
-          label: 'Promedio',
-          data: y,
-          type: 'line',
-          borderColor: borderColor[4],
-
-        })
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                scales: {
-                  yAxes: [{
-                    // stacked: true,
-                    ticks: {
-                      beginAtZero: true
-                    }
-                  }],
-                  xAxes: [{
-                    // stacked: true,
-                    ticks: {
-                      beginAtZero: true
-                    }
-                  }]
+    <script src='./result.js'></script>
+    <script>
+      var fullctx = document.getElementById('fullData');
+      var fullLabel;
+      var files = Object.keys(data);
+      var file = files[0];
+      var backgroundColors = [
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(153, 102, 255, 0.2)',
+          'rgba(255, 159, 64, 0.2)'
+      ];
+      var borderColor = [
+          'rgba(255,99,132,1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)'
+      ]
+      var fullData = {};
+      var canvasContainer = document.getElementById('canvasContainer');
+      var traces = files.map(function(file, fileIndex){
+          canvasContainer.insertAdjacentHTML('beforeend', '<h2>Archivo '+file+'</h2><canvas id="'+file+'"></canvas>');
+          var ctx = document.getElementById(file);
+          var labels = [];
+          var y = [];
+          var datasets = [];
+          Object.keys(data[file]).forEach(function(label, index){
+            y.push(parseInt(math.mean(data[file][label])));
+            labels.push(label + ' loop');
+            data[file][label].forEach(function(elm, subindex){
+              if(!datasets[subindex]){
+                datasets[subindex] = {
+                    label: 'n° '+ (subindex +1),
+                    data: [],
+                    backgroundColor: backgroundColors[subindex],
+                    borderColor: borderColor[subindex],
+                    borderWidth: 1
                 }
-            }
-        });
-  });
-  var totalChar = new Chart(fullctx, {
-      type: 'bar',
-      data: {
-          labels: fullLabel,
-          datasets: Object.values(fullData)
-      },
-      options: {
-          scales: {
-            yAxes: [{
-              // stacked: true,
-              ticks: {
-                beginAtZero: true
               }
-            }],
-            xAxes: [{
-              // stacked: true,
-              ticks: {
-                beginAtZero: true
-              }
-            }]
+              datasets[subindex].data.push(elm);
+            });
+          });
+          if(!fullLabel){
+            fullLabel = labels;
           }
-      }
-  });
-</script>
+          if(!fullData[file]){
+            fullData[file] = {
+                label: file,
+                data: y,
+                backgroundColor: backgroundColors[fileIndex],
+                borderColor: borderColor[fileIndex],
+                borderWidth: 1
+            }
+          }
+          datasets.push({
+            label: 'Promedio',
+            data: y,
+            type: 'line',
+            borderColor: borderColor[4],
+
+          })
+          var myChart = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: labels,
+                  datasets: datasets
+              },
+              options: {
+                  scales: {
+                    yAxes: [{
+                      // stacked: true,
+                      ticks: {
+                        beginAtZero: true
+                      }
+                    }],
+                    xAxes: [{
+                      // stacked: true,
+                      ticks: {
+                        beginAtZero: true
+                      }
+                    }]
+                  }
+              }
+          });
+    });
+    var totalChar = new Chart(fullctx, {
+        type: 'bar',
+        data: {
+            labels: fullLabel,
+            datasets: Object.values(fullData)
+        },
+        options: {
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true
+                }
+              }],
+              xAxes: [{
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+            }
+        }
+    });
+  </script>
+  </body>
 </body>
+</html>

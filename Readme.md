@@ -47,3 +47,26 @@ Examples
 
 
 ```
+## Test file format:
+Example: `tests/index.js`
+```
+function beforeAll() {
+  //do somethink
+}
+function test() {
+  //do somethink
+}
+function afterAll() {
+  //do somethink
+}
+module.exports = {
+  beforeAll,
+  test,
+  adterAll
+}
+```
+
+# Example:
+code example [HERE](https://github.com/ivanhuay/micron-runner-example).
+
+view results [HERE](https://ivanhuay.github.io/micron-runner-example/)
