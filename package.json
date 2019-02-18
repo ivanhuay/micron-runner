@@ -7,7 +7,7 @@
     "micron-runner": "./micron-cli.js"
   },
   "directories": {
-    "test": "tests"
+    "template": "template"
   },
   "dependencies": {
     "chalk": "^2.4.2",

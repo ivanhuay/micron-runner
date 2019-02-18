@@ -84,7 +84,6 @@ try {
       console.log(usage);
       return;
   }
-  console.log(`options: ${JSON.stringify(options)}`);
 } catch (e) {
   console.log(usage);
   return;

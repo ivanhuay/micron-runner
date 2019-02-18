@@ -19,7 +19,6 @@ class Micron{
     }
     this.config.folder = path.resolve(this.config.folder);
     this.config.oudir = path.resolve(this.config.outdir);
-    console.log('pathresolve: ', path.resolve(this.config.folder));
   }
   readFiles(){
     this.files =  fs.readdirSync(this.config.folder);
@@ -41,7 +40,7 @@ class Micron{
   }
   async runLoop(file, currentStep) {
     if(this.config.verbose){
-      console.log('starting: ', file, ' currentStep: ', currentStep);
+      this.info('starting: ', file, ' currentStep: ', currentStep);
     }
     const testModule = require(file);
     const timeData = [];
@@ -54,7 +53,12 @@ class Micron{
   async run(){
     this.readFiles();
     let response = {};
+    console.log('starting process...');
+    const total = this.files.length;
+    let currentProgress = 0;
     for(let currentFile of this.files){
+      const percent = Math.round((currentProgress / total) * 100);
+      console.log(`progress: ${percent}%`);
       let file = `${this.config.folder}/${currentFile}`;
       const fileName = path.basename(file);
       for(let i = this.config.start; i <= this.config.end; i += this.config.step) {
@@ -66,7 +70,9 @@ class Micron{
         }
         response[fileName][j] = testResponse;
       }
+      currentProgress++;
     }
+    console.log(`progress: 100%`);
     if(this.config.writeResults){
       return this.writeResults(response);
     }
@@ -76,11 +82,17 @@ class Micron{
     if(!fs.existsSync(this.config.outdir)){
         fs.mkdirSync(this.config.outdir);
     }
-    console.log('response: ', JSON.stringify(data));
+    this.info('response: ', JSON.stringify(data));
     fs.writeFileSync(`${this.config.outdir}/result.js`, 'var data = ' + JSON.stringify(data) +  ';');
-    fs.copyFileSync('./template/char.html', `${this.config.outdir}/index.html`)
+    this.info('path', path.resolve(`${__dirname}/template/char.html`));
+    fs.copyFileSync(path.resolve(`${__dirname}/template/char.html`), `${this.config.outdir}/index.html`)
+    console.log('done');
+  }
+  info(...args){
+    if(this.config.verbose){
+      console.log(args.join(''));
+    }
   }
 }
-
 
 module.exports = Micron;
