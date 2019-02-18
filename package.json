@@ -1,6 +1,6 @@
 {
   "name": "micron-runner",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Benchmark runner",
   "main": "micron.js",
   "bin": {
@@ -34,7 +34,7 @@
   "author": "ivanhuay@gmail.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/ivanhuay/test-runner/issues"
+    "url": "https://github.com/ivanhuay/micron-runner/issues"
   },
-  "homepage": "https://gitlab.com/ivanhuay/test-runner#README"
+  "homepage": "https://gitlab.com/ivanhuay/micron-runner#README"
 }
