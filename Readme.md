@@ -47,6 +47,17 @@ Examples
 
 
 ```
+### Defaults:
+default configuration values
+```
+  start: 100
+  end: 2100
+  step: 500
+  repeats: 3
+  folder: 'tests'
+  outdir: 'results'
+  verbose: false
+```
 ## Test file format:
 Example: `tests/index.js`
 ```
@@ -65,8 +76,11 @@ module.exports = {
   adterAll
 }
 ```
-
 # Example:
 code example [HERE](https://github.com/ivanhuay/micron-runner-example).
 
 view results [HERE](https://ivanhuay.github.io/micron-runner-example/)
+
+
+## Changelog
+* v0.0.4: test folder validation added.

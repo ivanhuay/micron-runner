@@ -94,4 +94,8 @@ try {
 const runner = new Micron(options);
 
 runner
-    .run();
+    .run()
+    .catch((error) => {
+        console.log(usage);
+        console.error('MicronError: ', error);
+    });

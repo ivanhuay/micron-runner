@@ -20,6 +20,9 @@ class Micron {
         this.config.oudir = path.resolve(this.config.outdir);
     }
     readFiles() {
+        if(!fs.existsSync(this.config.folder)) {
+            throw new Error('Test folder doesn\'t exist');
+        }
         this.files =  fs.readdirSync(this.config.folder);
         this.log('files: ', JSON.stringify(this.files));
     }
