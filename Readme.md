@@ -103,3 +103,4 @@ view results [HERE](https://ivanhuay.github.io/micron-runner-example/)
 ## Changelog
 * v0.0.4: test folder validation added.
 * v0.0.5: fix results html template.
+* v0.0.6: fix stdout in micron.js file.

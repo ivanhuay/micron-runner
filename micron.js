@@ -96,7 +96,7 @@ class Micron {
         }
     }
     log(...args) {
-        this.process.stdout(args.join('') + '\n');
+        process.stdout.write(args.join('') + '\n');
     }
 }
 
