@@ -56,7 +56,7 @@
       var fullData = {};
       var canvasContainer = document.getElementById('canvasContainer');
       var traces = files.map(function(file, fileIndex){
-          canvasContainer.insertAdjacentHTML('beforeend', '<h2>Archivo '+file+'</h2><canvas id="'+file+'"></canvas>');
+          canvasContainer.insertAdjacentHTML('beforeend', '<h2>File "'+file+'"</h2><canvas id="'+file+'"></canvas>');
           var ctx = document.getElementById(file);
           var labels = [];
           var y = [];
@@ -105,13 +105,11 @@
               options: {
                   scales: {
                     yAxes: [{
-                      // stacked: true,
                       ticks: {
                         beginAtZero: true
                       }
                     }],
                     xAxes: [{
-                      // stacked: true,
                       ticks: {
                         beginAtZero: true
                       }

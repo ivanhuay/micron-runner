@@ -15,7 +15,25 @@ npm i --save  -g micron-runner
 ```
 
 ## Usage:
-command line:
+run with [default params](#defaults).
+```
+micron-runnner
+```
+with some custom params:
+```
+micron-runner --end 10100 --step 1000
+```
+require a `tests` folder, example:
+```
+── tests
+    ├── console-log.js
+    └── stdout.js
+```
+
+help:
+```
+micron-runner --h
+```
 ```
 
 █▀▄▀█ ▄█ ▄█▄    █▄▄▄▄ ████▄    ▄     ▄
@@ -84,3 +102,4 @@ view results [HERE](https://ivanhuay.github.io/micron-runner-example/)
 
 ## Changelog
 * v0.0.4: test folder validation added.
+* v0.0.5: fix results html template.
