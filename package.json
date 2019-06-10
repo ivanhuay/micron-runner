@@ -1,6 +1,6 @@
 {
   "name": "micron-runner",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Benchmark runner",
   "main": "micron.js",
   "bin": {
@@ -15,7 +15,7 @@
     "command-line-usage": "^5.0.5"
   },
   "devDependencies": {
-    "eslint": "^5.14.0",
+    "eslint": "^5.16.0",
     "mongoose": "^5.4.11"
   },
   "scripts": {
