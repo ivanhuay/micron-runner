@@ -6,13 +6,13 @@ const commandLineUsage = require('command-line-usage');
 const chalk = require('chalk');
 const header = require('./assets/header');
 const optionDefinitions = [
-    {name: 'folder', defaultOption: true},
+    {name: 'folder', defaultOption: true, type: String},
     {name: 'start', alias: 's', type: Number},
     {name: 'end', alias: 'e', type: Number},
     {name: 'step', alias: 'i', type: Number},
     {name: 'repeats', alias: 'r', type: Number},
     {name: 'verbose', alias: 'v', type: Boolean},
-    {name: 'outdir', alias: 'o', type: Boolean},
+    {name: 'outdir', alias: 'o', type: String},
     {name: 'help', alias: 'h', type: Boolean}
 ];
 const sections = [
