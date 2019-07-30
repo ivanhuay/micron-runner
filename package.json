@@ -1,6 +1,6 @@
 {
   "name": "micron-runner",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Benchmark runner",
   "main": "micron.js",
   "bin": {
