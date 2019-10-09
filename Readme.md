@@ -101,6 +101,7 @@ view results [HERE](https://ivanhuay.github.io/micron-runner-example/)
 
 
 ## Changelog
+* v0.0.12: Fixed labels to general chart.
 * v0.0.11: Axis labels added & fixed loop label.
 * v0.0.4: test folder validation added.
 * v0.0.5: fix results html template.

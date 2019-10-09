@@ -135,11 +135,19 @@
         options: {
             scales: {
               yAxes: [{
+                scaleLabel:{
+                  display: true,
+                  labelString: 'ms'
+                },
                 ticks: {
                   beginAtZero: true
                 }
               }],
               xAxes: [{
+                scaleLabel:{
+                  display: true,
+                  labelString: 'loop count'
+                },
                 ticks: {
                   beginAtZero: true
                 }
