@@ -63,7 +63,7 @@
           var datasets = [];
           Object.keys(data[file]).forEach(function(label, index){
             y.push(parseInt(math.mean(data[file][label])));
-            labels.push(label + ' loop');
+            labels.push(label);
             data[file][label].forEach(function(elm, subindex){
               if(!datasets[subindex]){
                 datasets[subindex] = {
@@ -105,11 +105,19 @@
               options: {
                   scales: {
                     yAxes: [{
+                      scaleLabel:{
+                        display: true,
+                        labelString: 'ms'
+                      },
                       ticks: {
                         beginAtZero: true
                       }
                     }],
                     xAxes: [{
+                      scaleLabel:{
+                        display: true,
+                        labelString: 'loop count'
+                      },
                       ticks: {
                         beginAtZero: true
                       }
