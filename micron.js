@@ -122,11 +122,11 @@ class Micron {
     }
     async run() {
         this.readFiles();
-        let response = {};
+        const response = {};
         this.log('starting process...');
         const total = this.files.length;
         let currentProgress = 0;
-        for(let currentFile of this.files) {
+        for(const currentFile of this.files) {
             const file = `${this.config.folder}/${currentFile}`;
             const fileName = path.basename(file);
             const steps = [];
@@ -147,7 +147,7 @@ class Micron {
                 this.printTable(fileName, response[fileName]);
             }
         }
-        process.stdout.write(`\r  progress: 100%  \n`);
+        process.stdout.write('\r  progress: 100%  \n');
         if(this.config.json) {
             process.stdout.write(JSON.stringify(response, null, 2) + '\n');
             return response;

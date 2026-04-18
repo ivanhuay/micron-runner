@@ -101,8 +101,8 @@ try {
         console.log(usage);
         process.exit(0);
     }
-} catch(e) {
-    console.log(usage);
+} catch(_e) {
+    console.log(usage); // eslint-disable-line no-console
     process.exit(1);
 }
 
