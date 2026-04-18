@@ -87,12 +87,12 @@ micron --help
 ## Milestones
 
 ### M1 — Foundation
-- [ ] Migrate to ESM (`"type": "module"` in package.json)
-- [ ] New test interface: named exports, `.bench.js` convention
-- [ ] Rename hooks: `setup` / `teardown` (drop `beforeAll`/`afterAll`)
-- [ ] Auto-detect `benchmarks/` folder if no arg given
-- [ ] Fix `oudir` typo bug
-- [ ] Fix `writeResults` return value
+- [x] Migrate to ESM (`"type": "module"` in package.json)
+- [x] New test interface: named exports, `.bench.js` convention
+- [x] Rename hooks: `setup` / `teardown` (drop `beforeAll`/`afterAll`)
+- [x] Auto-detect `benchmarks/` folder if no arg given
+- [x] Fix `oudir` typo bug
+- [x] Fix `writeResults` return value
 
 ### M2 — Validation & Errors
 - [ ] Validate `bench` export exists — throw with filename context
@@ -127,7 +127,7 @@ micron --help
 
 | Milestone | Status |
 |-----------|--------|
-| M1 — Foundation | 🔴 Not started |
+| M1 — Foundation | ✅ Done |
 | M2 — Validation & Errors | 🔴 Not started |
 | M3 — Output & Reporting | 🔴 Not started |
 | M4 — Test Suite & CI | 🔴 Not started |

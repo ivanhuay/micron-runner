@@ -1,6 +1,7 @@
-'use strict';
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { pathToFileURL } from 'url';
+
 class Micron {
     constructor(config) {
         this.config = {
@@ -8,7 +9,7 @@ class Micron {
             end: 2100,
             step: 500,
             repeats: 3,
-            folder: 'tests',
+            folder: 'benchmarks',
             outdir: 'results',
             writeResults: true,
             verbose: false
@@ -17,25 +18,26 @@ class Micron {
             this.config = Object.assign(this.config, config);
         }
         this.config.folder = path.resolve(this.config.folder);
-        this.config.oudir = path.resolve(this.config.outdir);
+        this.config.outdir = path.resolve(this.config.outdir);
     }
     readFiles() {
         if(!fs.existsSync(this.config.folder)) {
-            throw new Error('Test folder doesn\'t exist');
+            throw new Error(`MicronError: folder "${this.config.folder}" doesn't exist`);
         }
-        this.files =  fs.readdirSync(this.config.folder);
+        this.files = fs.readdirSync(this.config.folder)
+            .filter(f => f.endsWith('.bench.js'));
         this.log('files: ', JSON.stringify(this.files));
     }
     async execTest(testModule, currentStep) {
-        if(typeof testModule.beforeAll === 'function') {
-            await testModule.beforeAll();
+        if(typeof testModule.setup === 'function') {
+            await testModule.setup();
         }
         const startTime = Date.now();
         for(let i = 0; i < currentStep; i++) {
-            await testModule.test();
+            await testModule.bench(currentStep);
         }
-        if(typeof testModule.afterAll === 'function') {
-            await testModule.afterAll();
+        if(typeof testModule.teardown === 'function') {
+            await testModule.teardown();
         }
         const endTime = Date.now();
         return endTime - startTime;
@@ -44,7 +46,11 @@ class Micron {
         if(this.config.verbose) {
             this.info('starting: ', file, ' currentStep: ', currentStep);
         }
-        const testModule = require(file);
+        // cache-bust each import so repeated runs get fresh module state
+        const testModule = await import(pathToFileURL(file).href + `?t=${Date.now()}`);
+        if(typeof testModule.bench !== 'function') {
+            throw new Error(`MicronError [${path.basename(file)}]: missing required export: bench`);
+        }
         const timeData = [];
         for(let j = 0; j < this.config.repeats; j++) {
             const time = await this.execTest(testModule, currentStep);
@@ -64,13 +70,11 @@ class Micron {
             let file = `${this.config.folder}/${currentFile}`;
             const fileName = path.basename(file);
             for(let i = this.config.start; i <= this.config.end; i += this.config.step) {
-                let j = i;
-                let testResponse = await this.runLoop(file, j);
-
+                let testResponse = await this.runLoop(file, i);
                 if(!response[fileName]) {
                     response[fileName] = {};
                 }
-                response[fileName][j] = testResponse;
+                response[fileName][i] = testResponse;
             }
             currentProgress++;
         }
@@ -86,9 +90,10 @@ class Micron {
         }
         this.info('response: ', JSON.stringify(data));
         fs.writeFileSync(`${this.config.outdir}/result.js`, 'var data = ' + JSON.stringify(data) + ';');
-        this.info('path', path.resolve(`${__dirname}/template/char.html`));
-        fs.copyFileSync(path.resolve(`${__dirname}/template/char.html`), `${this.config.outdir}/index.html`);
+        const templateSrc = path.resolve(path.dirname(new URL(import.meta.url).pathname), 'template/char.html');
+        fs.copyFileSync(templateSrc, `${this.config.outdir}/index.html`);
         this.log('done');
+        return path.resolve(this.config.outdir);
     }
     info(...args) {
         if(this.config.verbose) {
@@ -100,4 +105,4 @@ class Micron {
     }
 }
 
-module.exports = Micron;
+export default Micron;

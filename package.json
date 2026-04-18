@@ -1,7 +1,8 @@
 {
   "name": "micron-runner",
-  "version": "0.0.12",
+  "version": "1.0.0",
   "description": "Benchmark runner",
+  "type": "module",
   "main": "micron.js",
   "bin": {
     "micron-runner": "./micron-cli.js"
