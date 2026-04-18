@@ -95,11 +95,11 @@ micron --help
 - [x] Fix `writeResults` return value
 
 ### M2 — Validation & Errors
-- [ ] Validate `bench` export exists — throw with filename context
-- [ ] Warn if `setup` / `teardown` missing (not error)
-- [ ] Validate `start < end`, `step > 0`, `repeats >= 1`
-- [ ] Clear `MicronError: [file] reason` format for all errors
-- [ ] Bust module cache between runs (ESM: re-import with cache-busting query param)
+- [x] Validate `bench` export exists — throw with filename context
+- [x] Warn if `setup` / `teardown` missing (not error)
+- [x] Validate `start < end`, `step > 0`, `repeats >= 1`
+- [x] Clear `MicronError: [file] reason` format for all errors
+- [x] Bust module cache between runs (ESM: re-import with cache-busting query param)
 
 ### M3 — Output & Reporting
 - [ ] Stdout table: min / avg / max / p95 per step per file
@@ -128,7 +128,7 @@ micron --help
 | Milestone | Status |
 |-----------|--------|
 | M1 — Foundation | ✅ Done |
-| M2 — Validation & Errors | 🔴 Not started |
+| M2 — Validation & Errors | ✅ Done |
 | M3 — Output & Reporting | 🔴 Not started |
 | M4 — Test Suite & CI | 🔴 Not started |
 | M5 — DX & Distribution | 🔴 Not started |

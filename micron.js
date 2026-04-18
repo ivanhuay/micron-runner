@@ -19,6 +19,19 @@ class Micron {
         }
         this.config.folder = path.resolve(this.config.folder);
         this.config.outdir = path.resolve(this.config.outdir);
+        this.validateConfig();
+    }
+    validateConfig() {
+        const { start, end, step, repeats } = this.config;
+        if(start >= end) {
+            throw new Error(`MicronError: start (${start}) must be less than end (${end})`);
+        }
+        if(step <= 0) {
+            throw new Error(`MicronError: step must be > 0, got ${step}`);
+        }
+        if(repeats < 1) {
+            throw new Error(`MicronError: repeats must be >= 1, got ${repeats}`);
+        }
     }
     readFiles() {
         if(!fs.existsSync(this.config.folder)) {
@@ -26,6 +39,9 @@ class Micron {
         }
         this.files = fs.readdirSync(this.config.folder)
             .filter(f => f.endsWith('.bench.js'));
+        if(this.files.length === 0) {
+            throw new Error(`MicronError: no *.bench.js files found in "${this.config.folder}"`);
+        }
         this.log('files: ', JSON.stringify(this.files));
     }
     async execTest(testModule, currentStep) {
@@ -46,10 +62,16 @@ class Micron {
         if(this.config.verbose) {
             this.info('starting: ', file, ' currentStep: ', currentStep);
         }
-        // cache-bust each import so repeated runs get fresh module state
         const testModule = await import(pathToFileURL(file).href + `?t=${Date.now()}`);
+        const fileName = path.basename(file);
         if(typeof testModule.bench !== 'function') {
-            throw new Error(`MicronError [${path.basename(file)}]: missing required export: bench`);
+            throw new Error(`MicronError [${fileName}]: missing required export: bench`);
+        }
+        if(typeof testModule.setup !== 'function') {
+            this.warn(`[${fileName}]: no setup export — skipping`);
+        }
+        if(typeof testModule.teardown !== 'function') {
+            this.warn(`[${fileName}]: no teardown export — skipping`);
         }
         const timeData = [];
         for(let j = 0; j < this.config.repeats; j++) {
@@ -94,6 +116,9 @@ class Micron {
         fs.copyFileSync(templateSrc, `${this.config.outdir}/index.html`);
         this.log('done');
         return path.resolve(this.config.outdir);
+    }
+    warn(...args) {
+        process.stderr.write('MicronWarn: ' + args.join('') + '\n');
     }
     info(...args) {
         if(this.config.verbose) {
