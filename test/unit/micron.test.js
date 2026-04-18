@@ -73,7 +73,7 @@ describe('Micron calcStats', () => {
 describe('Micron readFiles', () => {
     it('throws when folder does not exist', () => {
         const m = new Micron({ start: 10, end: 100, step: 10, folder: '/nonexistent/path' });
-        expect(() => m.readFiles()).toThrow('MicronError: folder');
+        expect(() => m.readFiles()).toThrow('MicronError: path');
     });
 
     it('throws when no .bench.js files found', () => {

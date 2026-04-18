@@ -37,12 +37,21 @@ class Micron {
     }
     readFiles() {
         if(!fs.existsSync(this.config.folder)) {
-            throw new Error(`MicronError: folder "${this.config.folder}" doesn't exist`);
+            throw new Error(`MicronError: path "${this.config.folder}" doesn't exist`);
         }
-        this.files = fs.readdirSync(this.config.folder)
-            .filter(f => f.endsWith('.bench.js'));
-        if(this.files.length === 0) {
-            throw new Error(`MicronError: no *.bench.js files found in "${this.config.folder}"`);
+        const stat = fs.statSync(this.config.folder);
+        if(stat.isFile()) {
+            if(!this.config.folder.endsWith('.bench.js')) {
+                throw new Error(`MicronError: file "${this.config.folder}" must end in .bench.js`);
+            }
+            this.files = [path.basename(this.config.folder)];
+            this.config.folder = path.dirname(this.config.folder);
+        } else {
+            this.files = fs.readdirSync(this.config.folder)
+                .filter(f => f.endsWith('.bench.js'));
+            if(this.files.length === 0) {
+                throw new Error(`MicronError: no *.bench.js files found in "${this.config.folder}"`);
+            }
         }
         this.log('files: ', JSON.stringify(this.files));
     }
