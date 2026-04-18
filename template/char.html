@@ -3,159 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.4.2/math.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-  <link rel="stylesheet" href="https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
-  <link rel="stylesheet" href="https://cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css"
-  <title>MicronRunner results</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+  <title>Micron Runner — Results</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; margin: 0; padding: 24px; }
+    h1 { font-size: 1.5rem; font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
+    h2 { font-size: 1rem; font-weight: 500; color: #94a3b8; margin: 32px 0 12px; }
+    .subtitle { color: #64748b; font-size: 0.85rem; margin-bottom: 32px; }
+    .card { background: #1e2330; border: 1px solid #2d3748; border-radius: 10px; padding: 20px; margin-bottom: 24px; }
+    canvas { max-height: 320px; }
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 0.78rem; color: #94a3b8; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  </style>
 </head>
 <body>
-  <body>
-    <div class="container">
-      <div class="row">
-        <div class="column">
-          <h1>Tests results:</h1>
-        </div>
-      </div>
-      <div class="row">
-        <div class="column">
-          <h2>All test comparision:</h2>
-          <canvas id="fullData"></canvas>
-        </div>
-      </div>
-      <div class="row">
-        <div class="column">
-          <div id="canvasContainer"></div>
-        </div>
-      </div>
-    </div>
-    <script src='./result.js'></script>
-    <script>
-      var fullctx = document.getElementById('fullData');
-      var fullLabel;
-      var files = Object.keys(data);
-      var file = files[0];
-      var backgroundColors = [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)'
-      ];
-      var borderColor = [
-          'rgba(255,99,132,1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)'
-      ]
-      var fullData = {};
-      var canvasContainer = document.getElementById('canvasContainer');
-      var traces = files.map(function(file, fileIndex){
-          canvasContainer.insertAdjacentHTML('beforeend', '<h2>File "'+file+'"</h2><canvas id="'+file+'"></canvas>');
-          var ctx = document.getElementById(file);
-          var labels = [];
-          var y = [];
-          var datasets = [];
-          Object.keys(data[file]).forEach(function(label, index){
-            y.push(parseInt(math.mean(data[file][label])));
-            labels.push(label);
-            data[file][label].forEach(function(elm, subindex){
-              if(!datasets[subindex]){
-                datasets[subindex] = {
-                    label: 'n° '+ (subindex +1),
-                    data: [],
-                    backgroundColor: backgroundColors[subindex],
-                    borderColor: borderColor[subindex],
-                    borderWidth: 1
-                }
-              }
-              datasets[subindex].data.push(elm);
-            });
-          });
-          if(!fullLabel){
-            fullLabel = labels;
-          }
-          if(!fullData[file]){
-            fullData[file] = {
-                label: file,
-                data: y,
-                backgroundColor: backgroundColors[fileIndex],
-                borderColor: borderColor[fileIndex],
-                borderWidth: 1
-            }
-          }
-          datasets.push({
-            label: 'Promedio',
-            data: y,
-            type: 'line',
-            borderColor: borderColor[4],
+  <h1>Micron Runner — Benchmark Results</h1>
+  <p class="subtitle">Performance sweep: how execution time scales with N</p>
 
-          })
-          var myChart = new Chart(ctx, {
-              type: 'bar',
-              data: {
-                  labels: labels,
-                  datasets: datasets
-              },
-              options: {
-                  scales: {
-                    yAxes: [{
-                      scaleLabel:{
-                        display: true,
-                        labelString: 'ms'
-                      },
-                      ticks: {
-                        beginAtZero: true
-                      }
-                    }],
-                    xAxes: [{
-                      scaleLabel:{
-                        display: true,
-                        labelString: 'loop count'
-                      },
-                      ticks: {
-                        beginAtZero: true
-                      }
-                    }]
-                  }
-              }
-          });
-    });
-    var totalChar = new Chart(fullctx, {
-        type: 'bar',
-        data: {
-            labels: fullLabel,
-            datasets: Object.values(fullData)
-        },
-        options: {
-            scales: {
-              yAxes: [{
-                scaleLabel:{
-                  display: true,
-                  labelString: 'ms'
-                },
-                ticks: {
-                  beginAtZero: true
-                }
-              }],
-              xAxes: [{
-                scaleLabel:{
-                  display: true,
-                  labelString: 'loop count'
-                },
-                ticks: {
-                  beginAtZero: true
-                }
-              }]
-            }
+  <div id="overviewSection">
+    <h2>Overview — all benchmarks (avg ms)</h2>
+    <div class="card"><canvas id="fullData"></canvas></div>
+  </div>
+
+  <div id="canvasContainer"></div>
+
+  <script src="./result.js"></script>
+  <script>
+    var files = Object.keys(data);
+    var palette = {
+      bg:     ['rgba(99,179,237,0.2)','rgba(154,230,180,0.2)','rgba(252,176,69,0.2)','rgba(245,101,101,0.2)','rgba(183,148,246,0.2)','rgba(246,173,85,0.2)'],
+      border: ['rgba(99,179,237,1)',  'rgba(154,230,180,1)',  'rgba(252,176,69,1)',  'rgba(245,101,101,1)',  'rgba(183,148,246,1)',  'rgba(246,173,85,1)']
+    };
+
+    function calcStats(arr) {
+      var sorted = arr.slice().sort(function(a,b){ return a-b; });
+      var sum = sorted.reduce(function(a,b){ return a+b; }, 0);
+      return {
+        min: sorted[0],
+        avg: Math.round(sum / sorted.length),
+        max: sorted[sorted.length - 1],
+        p95: sorted[Math.ceil(0.95 * sorted.length) - 1]
+      };
+    }
+
+    var chartDefaults = {
+      tooltips: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: '#1e2330',
+        titleFontColor: '#f8fafc',
+        bodyFontColor: '#94a3b8',
+        borderColor: '#2d3748',
+        borderWidth: 1,
+        callbacks: {
+          label: function(item, d) {
+            return ' ' + d.datasets[item.datasetIndex].label + ': ' + item.yLabel + ' ms';
+          }
         }
+      },
+      scales: {
+        yAxes: [{ scaleLabel: { display: true, labelString: 'ms', fontColor: '#64748b' }, ticks: { beginAtZero: true, fontColor: '#64748b' }, gridLines: { color: '#2d3748' } }],
+        xAxes: [{ scaleLabel: { display: true, labelString: 'N (iterations)', fontColor: '#64748b' }, ticks: { fontColor: '#64748b' }, gridLines: { color: '#2d3748' } }]
+      },
+      legend: { labels: { fontColor: '#94a3b8', boxWidth: 12 } }
+    };
+
+    var overviewLabels;
+    var overviewDatasets = [];
+    var container = document.getElementById('canvasContainer');
+
+    files.forEach(function(file, fileIndex) {
+      var steps = Object.keys(data[file]);
+      var labels = steps;
+      if(!overviewLabels) overviewLabels = labels;
+
+      var avgData = [], minData = [], maxData = [], p95Data = [];
+      var repeatDatasets = [];
+
+      steps.forEach(function(step) {
+        var s = calcStats(data[file][step]);
+        avgData.push(s.avg);
+        minData.push(s.min);
+        maxData.push(s.max);
+        p95Data.push(s.p95);
+        data[file][step].forEach(function(val, ri) {
+          if(!repeatDatasets[ri]) {
+            repeatDatasets[ri] = {
+              label: 'run ' + (ri + 1),
+              data: [],
+              backgroundColor: palette.bg[ri % palette.bg.length],
+              borderColor: palette.border[ri % palette.border.length],
+              borderWidth: 1,
+              type: 'bar'
+            };
+          }
+          repeatDatasets[ri].data.push(val);
+        });
+      });
+
+      overviewDatasets.push({
+        label: file,
+        data: avgData,
+        backgroundColor: palette.bg[fileIndex % palette.bg.length],
+        borderColor: palette.border[fileIndex % palette.border.length],
+        borderWidth: 2,
+        fill: false,
+        type: 'line',
+        pointRadius: 4
+      });
+
+      var id = 'chart-' + fileIndex;
+      container.insertAdjacentHTML('beforeend',
+        '<h2>' + file + '</h2><div class="card"><canvas id="' + id + '"></canvas></div>'
+      );
+
+      var datasets = repeatDatasets.concat([
+        { label: 'avg',  data: avgData,  type: 'line', borderColor: palette.border[4], borderWidth: 2, fill: false, pointRadius: 3, borderDash: [] },
+        { label: 'p95',  data: p95Data,  type: 'line', borderColor: palette.border[3], borderWidth: 2, fill: false, pointRadius: 3, borderDash: [6,3] },
+        { label: 'min',  data: minData,  type: 'line', borderColor: palette.border[1], borderWidth: 1, fill: false, pointRadius: 2, borderDash: [3,3] },
+        { label: 'max',  data: maxData,  type: 'line', borderColor: palette.border[0], borderWidth: 1, fill: false, pointRadius: 2, borderDash: [3,3] }
+      ]);
+
+      new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: { labels: labels, datasets: datasets },
+        options: chartDefaults
+      });
+    });
+
+    new Chart(document.getElementById('fullData'), {
+      type: 'line',
+      data: { labels: overviewLabels, datasets: overviewDatasets },
+      options: chartDefaults
     });
   </script>
-  </body>
 </body>
 </html>

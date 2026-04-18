@@ -13,6 +13,8 @@ const optionDefinitions = [
     {name: 'repeats', alias: 'r', type: Number},
     {name: 'verbose', alias: 'v', type: Boolean},
     {name: 'outdir', alias: 'o', type: String},
+    {name: 'json', alias: 'j', type: Boolean},
+    {name: 'quiet', alias: 'q', type: Boolean},
     {name: 'help', alias: 'h', type: Boolean}
 ];
 
@@ -58,6 +60,14 @@ const sections = [
                 name: 'outdir',
                 typeLabel: '{underline path}',
                 description: 'Output folder for results (default: ./results).'
+            },
+            {
+                name: 'json',
+                description: 'Output results as JSON to stdout (CI-friendly, skips HTML).'
+            },
+            {
+                name: 'quiet',
+                description: 'Suppress all output except errors.'
             },
             {
                 name: 'help',

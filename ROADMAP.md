@@ -102,11 +102,11 @@ micron --help
 - [x] Bust module cache between runs (ESM: re-import with cache-busting query param)
 
 ### M3 — Output & Reporting
-- [ ] Stdout table: min / avg / max / p95 per step per file
-- [ ] `--json` flag: structured JSON to stdout for CI
-- [ ] Improve HTML chart: p95 line, tooltips with raw values, better styling
-- [ ] `--quiet` flag: suppress all except errors
-- [ ] Progress indicator during long sweeps
+- [x] Stdout table: min / avg / max / p95 per step per file
+- [x] `--json` flag: structured JSON to stdout for CI
+- [x] Improve HTML chart: p95 line, tooltips with raw values, better styling
+- [x] `--quiet` flag: suppress all except errors
+- [x] Progress indicator during long sweeps
 
 ### M4 — Test Suite & CI
 - [ ] Add vitest as dev dependency
@@ -129,6 +129,6 @@ micron --help
 |-----------|--------|
 | M1 — Foundation | ✅ Done |
 | M2 — Validation & Errors | ✅ Done |
-| M3 — Output & Reporting | 🔴 Not started |
+| M3 — Output & Reporting | ✅ Done |
 | M4 — Test Suite & CI | 🔴 Not started |
 | M5 — DX & Distribution | 🔴 Not started |
