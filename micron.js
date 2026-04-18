@@ -78,7 +78,7 @@ class Micron {
         const nW = Math.max(5, ...rows.map(r => String(r.n).length));
         const cols = ['min', 'avg', 'max', 'p95'];
         const colW = cols.reduce((acc, c) => {
-            acc[c] = Math.max(c.length, ...rows.map(r => String(r[c]).length)) + 2;
+            acc[c] = Math.max(c.length, ...rows.map(r => (String(r[c]) + 'ms').length)) + 2;
             return acc;
         }, {});
 
@@ -96,15 +96,35 @@ class Micron {
     }
     printChart(fileName, fileResults) {
         const steps = Object.keys(fileResults).map(Number);
-        const avgSeries = steps.map(n => this.calcStats(fileResults[n]).avg);
-        const p95Series = steps.map(n => this.calcStats(fileResults[n]).p95);
-        const chart = asciichart.plot([avgSeries, p95Series], {
-            height: 8,
+        const stats = steps.map(n => this.calcStats(fileResults[n]));
+        const avgSeries = stats.map(s => s.avg);
+        const p95Series = stats.map(s => s.p95);
+
+        // interpolate to at least 40 points so chart is readable regardless of step count
+        const MIN_POINTS = 40;
+        function interpolate(series) {
+            if(series.length >= MIN_POINTS) { return series; }
+            const out = [];
+            const factor = (MIN_POINTS - 1) / (series.length - 1);
+            for(let i = 0; i < MIN_POINTS; i++) {
+                const pos = i / factor;
+                const lo = Math.floor(pos);
+                const hi = Math.min(Math.ceil(pos), series.length - 1);
+                const t = pos - lo;
+                out.push(series[lo] + t * (series[hi] - series[lo]));
+            }
+            return out;
+        }
+
+        const maxVal = Math.max(...p95Series);
+        const labelWidth = (String(Math.round(maxVal)) + 'ms').length + 1;
+        const chart = asciichart.plot([interpolate(avgSeries), interpolate(p95Series)], {
+            height: 10,
             colors: [asciichart.blue, asciichart.red],
-            format: v => String(Math.round(v) + 'ms').padStart(7)
+            format: v => String(Math.round(v) + 'ms').padStart(labelWidth)
         });
         const stepLabels = steps.map(n => String(n)).join('  ');
-        process.stdout.write(`  avg (blue) / p95 (red) — N: ${stepLabels}\n`);
+        process.stdout.write(`  avg ── (blue)   p95 ── (red)   N: ${stepLabels}\n`);
         chart.split('\n').forEach(line => process.stdout.write('  ' + line + '\n'));
         process.stdout.write('\n');
     }
