@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
+import asciichart from 'asciichart';
 
 class Micron {
     constructor(config) {
@@ -93,6 +94,20 @@ class Micron {
         }
         process.stdout.write('  ' + hr('└', '┴', '┘', '─') + '\n\n');
     }
+    printChart(fileName, fileResults) {
+        const steps = Object.keys(fileResults).map(Number);
+        const avgSeries = steps.map(n => this.calcStats(fileResults[n]).avg);
+        const p95Series = steps.map(n => this.calcStats(fileResults[n]).p95);
+        const chart = asciichart.plot([avgSeries, p95Series], {
+            height: 8,
+            colors: [asciichart.blue, asciichart.red],
+            format: v => String(Math.round(v) + 'ms').padStart(7)
+        });
+        const stepLabels = steps.map(n => String(n)).join('  ');
+        process.stdout.write(`  avg (blue) / p95 (red) — N: ${stepLabels}\n`);
+        chart.split('\n').forEach(line => process.stdout.write('  ' + line + '\n'));
+        process.stdout.write('\n');
+    }
     async execTest(testModule, currentStep) {
         if(typeof testModule.setup === 'function') {
             await testModule.setup();
@@ -154,6 +169,7 @@ class Micron {
             currentProgress++;
             if(!this.config.quiet) {
                 this.printTable(fileName, response[fileName]);
+                this.printChart(fileName, response[fileName]);
             }
         }
         process.stdout.write('\r  progress: 100%  \n');

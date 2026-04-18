@@ -4,6 +4,13 @@
 
 **Breaking changes** — see migration guide below.
 
+### Visualization
+- Terminal: ASCII line chart (avg + p95) printed after each benchmark table, powered by `asciichart`
+- HTML: replaced Chart.js with Apache ECharts v5 — native support for area bands, dashed lines, better tooltips
+- HTML chart now shows min/avg/max band + p95 dashed line + min dotted line per file
+- Overview chart shows all benchmarks on one line chart for comparison
+- Dark theme preserved; charts are responsive (resize-aware)
+
 ### New features
 - ESM-first (`"type": "module"`)
 - New benchmark interface: named exports, `.bench.js` file convention
