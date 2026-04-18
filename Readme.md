@@ -1,108 +1,174 @@
 # Micron Runner
-Run your performance benchmark easier than ever.
 
-
-### Installation:
+Benchmark tool that shows **how performance scales with input size**. Run sweep benchmarks across a range of N values and visualize the results.
 
 ```
-npm i --save micron-runner
+micron-runner --sweep 100:5000:500
+
+  array-sort.bench.js
+  ┌───────┬──────┬──────┬──────┬──────┐
+  │   N   │  min │  avg │  max │  p95 │
+  ├───────┼──────┼──────┼──────┼──────┤
+  │   100 │   0ms│   0ms│   1ms│   0ms│
+  │   600 │   1ms│   1ms│   2ms│   1ms│
+  │  1100 │   3ms│   3ms│   4ms│   4ms│
+  └───────┴──────┴──────┴──────┴──────┘
 ```
 
-or global
+## Installation
 
 ```
-npm i --save  -g micron-runner
+npm install --save-dev micron-runner
 ```
 
-## Usage:
-run with [default params](#defaults).
-```
-micron-runnner
-```
-with some custom params:
-```
-micron-runner --end 10100 --step 1000
-```
-require a `tests` folder, example:
-```
-── tests
-    ├── console-log.js
-    └── stdout.js
-```
-
-help:
-```
-micron-runner --h
-```
-```
-
-█▀▄▀█ ▄█ ▄█▄    █▄▄▄▄ ████▄    ▄     ▄
-█ █ █ ██ █▀ ▀▄  █  ▄▀ █   █     █   █
-█ ▄ █ ██ █   ▀  █▀▀▌  █   █ ██   █ █
-█   █ ▐█ █▄  ▄▀ █  █  ▀████ █ █  █ █
-   █   ▐ ▀███▀    █         █  █ █
-  ▀              ▀          █   ██ ▀
-
-
-Micron - benchmark runner
-
-  Run your performance benchmark easier than ever.
-
-Options
-
-  --folder dir        The input folder.
-  --start integer     Initial amount of executions in the loop.
-  --end integer       End amount of executions in the loop.
-  --step integer      Step from start to end.
-  --repeats integer   Reapets for each loop.
-  --outdir path       Outdir for save results.
-  --help              Print this usage guide.
-
-Examples
-
-  Basic Example:   $ micron test
-  With Args:       $ micron test --start 200 --end 2200 --step 500 -r 3
-
+or globally:
 
 ```
-### Defaults:
-default configuration values
+npm install -g micron-runner
 ```
-  start: 100
-  end: 2100
-  step: 500
-  repeats: 3
-  folder: 'tests'
-  outdir: 'results'
-  verbose: false
+
+## Quick Start
+
+1. Create a `benchmarks/` folder in your project
+2. Add `.bench.js` files
+3. Run `micron-runner`
+
 ```
-## Test file format:
-Example: `tests/index.js`
+project/
+└── benchmarks/
+    ├── array-sort.bench.js
+    └── db-insert.bench.js
 ```
-function beforeAll() {
-  //do somethink
+
+## Benchmark File Format
+
+```js
+// benchmarks/my-benchmark.bench.js
+
+export const name = 'My benchmark';       // optional label
+
+export async function setup() {
+    // runs once before the sweep starts
 }
-function test() {
-  //do somethink
+
+export async function teardown() {
+    // runs once after the sweep ends
 }
-function afterAll() {
-  //do somethink
-}
-module.exports = {
-  beforeAll,
-  test,
-  adterAll
+
+export async function bench(n) {
+    // measured code — called n times per step
 }
 ```
-# Example:
-code example [HERE](https://github.com/ivanhuay/micron-runner-example).
 
-view results [HERE](https://ivanhuay.github.io/micron-runner-example/)
+Only `bench` is required. `setup`, `teardown`, and `name` are optional.
 
+## Examples
 
-## Changelog
-* v0.0.12: Fixed labels to general chart.
-* v0.0.11: Axis labels added & fixed loop label.
-* v0.0.4: test folder validation added.
-* v0.0.5: fix results html template.
-* v0.0.6: fix stdout in micron.js file.
+**Pure JS (no dependencies):**
+
+```js
+// benchmarks/array-sort.bench.js
+export async function bench(n) {
+    const arr = Array.from({ length: n }, () => Math.random());
+    arr.sort((a, b) => a - b);
+}
+```
+
+**With database setup:**
+
+```js
+// benchmarks/db-insert.bench.js
+import mongoose from 'mongoose';
+import User from '../models/user.js';
+
+export async function setup() {
+    await mongoose.connect('mongodb://localhost:27017/mydb');
+}
+
+export async function teardown() {
+    await mongoose.connection.close();
+}
+
+export async function bench() {
+    await User.create({ name: 'test', email: `test-${Date.now()}@x.com` });
+}
+```
+
+## CLI Usage
+
+```
+micron-runner                              # auto-detect ./benchmarks
+micron-runner ./my-folder                  # custom folder
+micron-runner --sweep 100:5000:500         # start:end:step shorthand
+micron-runner --start 100 --end 5000 --step 500
+micron-runner --repeats 5
+micron-runner --json > results.json        # CI-friendly JSON output
+micron-runner --quiet                      # errors only
+micron-runner --help
+```
+
+### Options
+
+| Flag | Alias | Description | Default |
+|------|-------|-------------|---------|
+| `--sweep start:end:step` | | Shorthand for start/end/step | |
+| `--start` | `-s` | Initial N | `100` |
+| `--end` | `-e` | Final N | `2100` |
+| `--step` | `-i` | Step between N values | `500` |
+| `--repeats` | `-r` | Repeats per step | `3` |
+| `--outdir` | `-o` | Output folder | `./results` |
+| `--json` | `-j` | Output JSON to stdout, skip HTML | |
+| `--quiet` | `-q` | Suppress all output except errors | |
+
+## Programmatic API
+
+```js
+import Micron from 'micron-runner';
+
+const runner = new Micron({
+    folder: './benchmarks',
+    start: 100,
+    end: 5000,
+    step: 500,
+    repeats: 3,
+    writeResults: true,   // write HTML chart to outdir
+    json: false,          // print JSON to stdout
+    quiet: false
+});
+
+const results = await runner.run();
+```
+
+## Output
+
+After each benchmark file, a table is printed to stdout:
+
+```
+  db-insert.bench.js
+  ┌───────┬──────┬──────┬──────┬──────┐
+  │   N   │  min │  avg │  max │  p95 │
+  ├───────┼──────┼──────┼──────┼──────┤
+  │   100 │  12ms│  14ms│  18ms│  17ms│
+  │   600 │  61ms│  65ms│  72ms│  70ms│
+  └───────┴──────┴──────┴──────┴──────┘
+```
+
+An HTML chart with avg, p95, min/max lines is written to `./results/index.html`.
+
+Use `--json` to get structured output for CI pipelines:
+
+```
+micron-runner --json > results.json
+```
+
+## TypeScript
+
+Types are included:
+
+```ts
+import Micron, { MicronConfig, BenchModule, BenchResults } from 'micron-runner';
+```
+
+## License
+
+MIT

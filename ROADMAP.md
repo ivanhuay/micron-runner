@@ -109,16 +109,17 @@ micron --help
 - [x] Progress indicator during long sweeps
 
 ### M4 — Test Suite & CI
-- [ ] Add vitest as dev dependency
-- [ ] Unit tests for `Micron` class
-- [ ] Integration tests with fixture `.bench.js` files
-- [ ] GitHub Actions CI workflow (Node 18, 20, 22)
+- [x] Add vitest as dev dependency
+- [x] Unit tests for `Micron` class
+- [x] Integration tests with fixture `.bench.js` files
+- [x] GitHub Actions CI workflow (Node 18, 20, 22)
 
 ### M5 — DX & Distribution
-- [ ] TypeScript types for config + bench module interface (`.d.ts`)
-- [ ] `--sweep start:end:step` shorthand CLI flag
-- [ ] Fix README (typos, update interface examples, add output screenshot)
-- [ ] `CHANGELOG.md`
+- [x] TypeScript types for config + bench module interface (`.d.ts`)
+- [x] `--sweep start:end:step` shorthand CLI flag
+- [x] Fix README (typos, updated interface, new examples)
+- [x] `CHANGELOG.md`
+- [x] Update examples to ESM + new `.bench.js` interface
 - [ ] Publish v1.0.0 to npm
 
 ---
@@ -130,5 +131,5 @@ micron --help
 | M1 — Foundation | ✅ Done |
 | M2 — Validation & Errors | ✅ Done |
 | M3 — Output & Reporting | ✅ Done |
-| M4 — Test Suite & CI | 🔴 Not started |
-| M5 — DX & Distribution | 🔴 Not started |
+| M4 — Test Suite & CI | ✅ Done |
+| M5 — DX & Distribution | ✅ Done (npm publish skipped) |
