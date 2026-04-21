@@ -124,7 +124,7 @@ class Micron {
             format: v => String(Math.round(v) + 'ms').padStart(labelWidth)
         });
         const stepLabels = steps.map(n => String(n)).join('  ');
-        process.stdout.write(`  avg ── (blue)   p95 ── (red)   N: ${stepLabels}\n`);
+        process.stdout.write(`  avg ── (blue)   p95 ── (red)   \nN: ${stepLabels}\n`);
         chart.split('\n').forEach(line => process.stdout.write('  ' + line + '\n'));
         process.stdout.write('\n');
     }
