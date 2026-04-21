@@ -1,6 +1,8 @@
-'use strict';
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { pathToFileURL } from 'url';
+import asciichart from 'asciichart';
+
 class Micron {
     constructor(config) {
         this.config = {
@@ -8,34 +10,134 @@ class Micron {
             end: 2100,
             step: 500,
             repeats: 3,
-            folder: 'tests',
+            folder: 'benchmarks',
             outdir: 'results',
             writeResults: true,
-            verbose: false
+            verbose: false,
+            quiet: false,
+            json: false
         };
         if(config) {
             this.config = Object.assign(this.config, config);
         }
         this.config.folder = path.resolve(this.config.folder);
-        this.config.oudir = path.resolve(this.config.outdir);
+        this.config.outdir = path.resolve(this.config.outdir);
+        this.validateConfig();
+    }
+    validateConfig() {
+        const { start, end, step, repeats } = this.config;
+        if(start >= end) {
+            throw new Error(`MicronError: start (${start}) must be less than end (${end})`);
+        }
+        if(step <= 0) {
+            throw new Error(`MicronError: step must be > 0, got ${step}`);
+        }
+        if(repeats < 1) {
+            throw new Error(`MicronError: repeats must be >= 1, got ${repeats}`);
+        }
     }
     readFiles() {
         if(!fs.existsSync(this.config.folder)) {
-            throw new Error('Test folder doesn\'t exist');
+            throw new Error(`MicronError: path "${this.config.folder}" doesn't exist`);
         }
-        this.files =  fs.readdirSync(this.config.folder);
+        const stat = fs.statSync(this.config.folder);
+        if(stat.isFile()) {
+            if(!this.config.folder.endsWith('.bench.js')) {
+                throw new Error(`MicronError: file "${this.config.folder}" must end in .bench.js`);
+            }
+            this.files = [path.basename(this.config.folder)];
+            this.config.folder = path.dirname(this.config.folder);
+        } else {
+            this.files = fs.readdirSync(this.config.folder)
+                .filter(f => f.endsWith('.bench.js'));
+            if(this.files.length === 0) {
+                throw new Error(`MicronError: no *.bench.js files found in "${this.config.folder}"`);
+            }
+        }
         this.log('files: ', JSON.stringify(this.files));
     }
+    calcStats(timeData) {
+        const sorted = [...timeData].sort((a, b) => a - b);
+        const sum = sorted.reduce((a, b) => a + b, 0);
+        const p95idx = Math.ceil(0.95 * sorted.length) - 1;
+        return {
+            min: sorted[0],
+            avg: Math.round(sum / sorted.length),
+            max: sorted[sorted.length - 1],
+            p95: sorted[p95idx]
+        };
+    }
+    printTable(fileName, fileResults) {
+        const steps = Object.keys(fileResults).map(Number);
+        const rows = steps.map(n => {
+            const s = this.calcStats(fileResults[n]);
+            return { n, ...s };
+        });
+
+        const pad = (val, len) => String(val).padStart(len);
+        const nW = Math.max(5, ...rows.map(r => String(r.n).length));
+        const cols = ['min', 'avg', 'max', 'p95'];
+        const colW = cols.reduce((acc, c) => {
+            acc[c] = Math.max(c.length, ...rows.map(r => (String(r[c]) + 'ms').length)) + 2;
+            return acc;
+        }, {});
+
+        const hr = (l, m, r, s) =>
+            l + s.repeat(nW + 2) + m + cols.map(c => s.repeat(colW[c])).join(m) + r;
+
+        process.stdout.write(`\n  ${fileName}\n`);
+        process.stdout.write('  ' + hr('┌', '┬', '┐', '─') + '\n');
+        process.stdout.write(`  │${pad('N', nW + 1)} │` + cols.map(c => pad(c, colW[c] - 1) + ' │').join('') + '\n');
+        process.stdout.write('  ' + hr('├', '┼', '┤', '─') + '\n');
+        for(const row of rows) {
+            process.stdout.write(`  │${pad(row.n, nW + 1)} │` + cols.map(c => pad(row[c] + 'ms', colW[c] - 1) + ' │').join('') + '\n');
+        }
+        process.stdout.write('  ' + hr('└', '┴', '┘', '─') + '\n\n');
+    }
+    printChart(fileName, fileResults) {
+        const steps = Object.keys(fileResults).map(Number);
+        const stats = steps.map(n => this.calcStats(fileResults[n]));
+        const avgSeries = stats.map(s => s.avg);
+        const p95Series = stats.map(s => s.p95);
+
+        // interpolate to at least 40 points so chart is readable regardless of step count
+        const MIN_POINTS = 40;
+        function interpolate(series) {
+            if(series.length >= MIN_POINTS) { return series; }
+            const out = [];
+            const factor = (MIN_POINTS - 1) / (series.length - 1);
+            for(let i = 0; i < MIN_POINTS; i++) {
+                const pos = i / factor;
+                const lo = Math.floor(pos);
+                const hi = Math.min(Math.ceil(pos), series.length - 1);
+                const t = pos - lo;
+                out.push(series[lo] + t * (series[hi] - series[lo]));
+            }
+            return out;
+        }
+
+        const maxVal = Math.max(...p95Series);
+        const labelWidth = (String(Math.round(maxVal)) + 'ms').length + 1;
+        const chart = asciichart.plot([interpolate(avgSeries), interpolate(p95Series)], {
+            height: 10,
+            colors: [asciichart.blue, asciichart.red],
+            format: v => String(Math.round(v) + 'ms').padStart(labelWidth)
+        });
+        const stepLabels = steps.map(n => String(n)).join('  ');
+        process.stdout.write(`  avg ── (blue)   p95 ── (red)   \nN: ${stepLabels}\n`);
+        chart.split('\n').forEach(line => process.stdout.write('  ' + line + '\n'));
+        process.stdout.write('\n');
+    }
     async execTest(testModule, currentStep) {
-        if(typeof testModule.beforeAll === 'function') {
-            await testModule.beforeAll();
+        if(typeof testModule.setup === 'function') {
+            await testModule.setup();
         }
         const startTime = Date.now();
         for(let i = 0; i < currentStep; i++) {
-            await testModule.test();
+            await testModule.bench(currentStep);
         }
-        if(typeof testModule.afterAll === 'function') {
-            await testModule.afterAll();
+        if(typeof testModule.teardown === 'function') {
+            await testModule.teardown();
         }
         const endTime = Date.now();
         return endTime - startTime;
@@ -44,7 +146,17 @@ class Micron {
         if(this.config.verbose) {
             this.info('starting: ', file, ' currentStep: ', currentStep);
         }
-        const testModule = require(file);
+        const testModule = await import(pathToFileURL(file).href + `?t=${Date.now()}`);
+        const fileName = path.basename(file);
+        if(typeof testModule.bench !== 'function') {
+            throw new Error(`MicronError [${fileName}]: missing required export: bench`);
+        }
+        if(typeof testModule.setup !== 'function') {
+            this.warn(`[${fileName}]: no setup export — skipping`);
+        }
+        if(typeof testModule.teardown !== 'function') {
+            this.warn(`[${fileName}]: no teardown export — skipping`);
+        }
         const timeData = [];
         for(let j = 0; j < this.config.repeats; j++) {
             const time = await this.execTest(testModule, currentStep);
@@ -54,27 +166,37 @@ class Micron {
     }
     async run() {
         this.readFiles();
-        let response = {};
+        const response = {};
         this.log('starting process...');
         const total = this.files.length;
         let currentProgress = 0;
-        for(let currentFile of this.files) {
-            const percent = Math.round((currentProgress / total) * 100);
-            this.log(`progress: ${percent}%`);
-            let file = `${this.config.folder}/${currentFile}`;
+        for(const currentFile of this.files) {
+            const file = `${this.config.folder}/${currentFile}`;
             const fileName = path.basename(file);
+            const steps = [];
             for(let i = this.config.start; i <= this.config.end; i += this.config.step) {
-                let j = i;
-                let testResponse = await this.runLoop(file, j);
-
+                steps.push(i);
+            }
+            for(const [idx, step] of steps.entries()) {
+                const percent = Math.round(((currentProgress + idx / steps.length) / total) * 100);
+                process.stdout.write(`\r  progress: ${percent}%  `);
+                const testResponse = await this.runLoop(file, step);
                 if(!response[fileName]) {
                     response[fileName] = {};
                 }
-                response[fileName][j] = testResponse;
+                response[fileName][step] = testResponse;
             }
             currentProgress++;
+            if(!this.config.quiet) {
+                this.printTable(fileName, response[fileName]);
+                this.printChart(fileName, response[fileName]);
+            }
         }
-        this.log('progress: 100%');
+        process.stdout.write('\r  progress: 100%  \n');
+        if(this.config.json) {
+            process.stdout.write(JSON.stringify(response, null, 2) + '\n');
+            return response;
+        }
         if(this.config.writeResults) {
             return this.writeResults(response);
         }
@@ -86,9 +208,13 @@ class Micron {
         }
         this.info('response: ', JSON.stringify(data));
         fs.writeFileSync(`${this.config.outdir}/result.js`, 'var data = ' + JSON.stringify(data) + ';');
-        this.info('path', path.resolve(`${__dirname}/template/char.html`));
-        fs.copyFileSync(path.resolve(`${__dirname}/template/char.html`), `${this.config.outdir}/index.html`);
-        this.log('done');
+        const templateSrc = path.resolve(path.dirname(new URL(import.meta.url).pathname), 'template/char.html');
+        fs.copyFileSync(templateSrc, `${this.config.outdir}/index.html`);
+        this.log(`results written to ${path.resolve(this.config.outdir)}`);
+        return path.resolve(this.config.outdir);
+    }
+    warn(...args) {
+        process.stderr.write('MicronWarn: ' + args.join('') + '\n');
     }
     info(...args) {
         if(this.config.verbose) {
@@ -96,8 +222,10 @@ class Micron {
         }
     }
     log(...args) {
-        process.stdout.write(args.join('') + '\n');
+        if(!this.config.quiet) {
+            process.stdout.write(args.join('') + '\n');
+        }
     }
 }
 
-module.exports = Micron;
+export default Micron;

@@ -1,8 +1,10 @@
 {
   "name": "micron-runner",
-  "version": "0.0.12",
+  "version": "1.0.0",
   "description": "Benchmark runner",
+  "type": "module",
   "main": "micron.js",
+  "types": "micron.d.ts",
   "bin": {
     "micron-runner": "./micron-cli.js"
   },
@@ -10,16 +12,21 @@
     "template": "template"
   },
   "dependencies": {
+    "asciichart": "^1.5.25",
     "chalk": "^2.4.2",
     "command-line-args": "^5.0.2",
     "command-line-usage": "^5.0.5"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "mongoose": "^5.4.11"
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "globals": "^17.5.0",
+    "mongoose": "^9.5.0",
+    "vitest": "^3.2.4"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",

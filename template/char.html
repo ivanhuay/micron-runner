@@ -3,159 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.4.2/math.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-  <link rel="stylesheet" href="https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
-  <link rel="stylesheet" href="https://cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css"
-  <title>MicronRunner results</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <title>Micron Runner — Results</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; margin: 0; padding: 24px; }
+    h1 { font-size: 1.4rem; font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
+    h2 { font-size: 0.95rem; font-weight: 500; color: #94a3b8; margin: 32px 0 8px; }
+    .subtitle { color: #64748b; font-size: 0.85rem; margin-bottom: 32px; }
+    .chart { width: 100%; height: 360px; background: #1e2330; border: 1px solid #2d3748; border-radius: 10px; margin-bottom: 24px; }
+  </style>
 </head>
 <body>
-  <body>
-    <div class="container">
-      <div class="row">
-        <div class="column">
-          <h1>Tests results:</h1>
-        </div>
-      </div>
-      <div class="row">
-        <div class="column">
-          <h2>All test comparision:</h2>
-          <canvas id="fullData"></canvas>
-        </div>
-      </div>
-      <div class="row">
-        <div class="column">
-          <div id="canvasContainer"></div>
-        </div>
-      </div>
-    </div>
-    <script src='./result.js'></script>
-    <script>
-      var fullctx = document.getElementById('fullData');
-      var fullLabel;
-      var files = Object.keys(data);
-      var file = files[0];
-      var backgroundColors = [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)'
-      ];
-      var borderColor = [
-          'rgba(255,99,132,1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)'
-      ]
-      var fullData = {};
-      var canvasContainer = document.getElementById('canvasContainer');
-      var traces = files.map(function(file, fileIndex){
-          canvasContainer.insertAdjacentHTML('beforeend', '<h2>File "'+file+'"</h2><canvas id="'+file+'"></canvas>');
-          var ctx = document.getElementById(file);
-          var labels = [];
-          var y = [];
-          var datasets = [];
-          Object.keys(data[file]).forEach(function(label, index){
-            y.push(parseInt(math.mean(data[file][label])));
-            labels.push(label);
-            data[file][label].forEach(function(elm, subindex){
-              if(!datasets[subindex]){
-                datasets[subindex] = {
-                    label: 'n° '+ (subindex +1),
-                    data: [],
-                    backgroundColor: backgroundColors[subindex],
-                    borderColor: borderColor[subindex],
-                    borderWidth: 1
-                }
-              }
-              datasets[subindex].data.push(elm);
-            });
-          });
-          if(!fullLabel){
-            fullLabel = labels;
-          }
-          if(!fullData[file]){
-            fullData[file] = {
-                label: file,
-                data: y,
-                backgroundColor: backgroundColors[fileIndex],
-                borderColor: borderColor[fileIndex],
-                borderWidth: 1
-            }
-          }
-          datasets.push({
-            label: 'Promedio',
-            data: y,
-            type: 'line',
-            borderColor: borderColor[4],
+  <h1>Micron Runner — Benchmark Results</h1>
+  <p class="subtitle">Performance sweep: how execution time scales with N</p>
 
-          })
-          var myChart = new Chart(ctx, {
-              type: 'bar',
-              data: {
-                  labels: labels,
-                  datasets: datasets
-              },
-              options: {
-                  scales: {
-                    yAxes: [{
-                      scaleLabel:{
-                        display: true,
-                        labelString: 'ms'
-                      },
-                      ticks: {
-                        beginAtZero: true
-                      }
-                    }],
-                    xAxes: [{
-                      scaleLabel:{
-                        display: true,
-                        labelString: 'loop count'
-                      },
-                      ticks: {
-                        beginAtZero: true
-                      }
-                    }]
-                  }
-              }
-          });
-    });
-    var totalChar = new Chart(fullctx, {
-        type: 'bar',
-        data: {
-            labels: fullLabel,
-            datasets: Object.values(fullData)
+  <h2>Overview — avg ms across all benchmarks</h2>
+  <div id="overview" class="chart"></div>
+
+  <div id="chartsContainer"></div>
+
+  <script src="./result.js"></script>
+  <script>
+    var files = Object.keys(data);
+    var palette = ['#63b3ed','#9ae6b4','#fc9e45','#f56565','#b794f6','#f6ad55'];
+
+    var theme = {
+      backgroundColor: '#1e2330',
+      textStyle: { color: '#94a3b8' },
+      title: { textStyle: { color: '#f8fafc' } },
+      tooltip: {
+        backgroundColor: '#1e2330',
+        borderColor: '#2d3748',
+        textStyle: { color: '#e2e8f0' }
+      },
+      axisLine: { lineStyle: { color: '#2d3748' } },
+      splitLine: { lineStyle: { color: '#2d3748' } }
+    };
+
+    function calcStats(arr) {
+      var sorted = arr.slice().sort(function(a, b) { return a - b; });
+      var sum = sorted.reduce(function(a, b) { return a + b; }, 0);
+      return {
+        min: sorted[0],
+        avg: Math.round(sum / sorted.length),
+        max: sorted[sorted.length - 1],
+        p95: sorted[Math.ceil(0.95 * sorted.length) - 1]
+      };
+    }
+
+    function baseOption(labels) {
+      return {
+        backgroundColor: theme.backgroundColor,
+        tooltip: Object.assign({ trigger: 'axis', axisPointer: { type: 'cross' } }, theme.tooltip),
+        legend: { textStyle: { color: '#94a3b8' }, top: 8 },
+        grid: { left: 60, right: 20, top: 48, bottom: 48 },
+        xAxis: {
+          type: 'category',
+          data: labels,
+          name: 'N (iterations)',
+          nameLocation: 'middle',
+          nameGap: 32,
+          axisLine: theme.axisLine,
+          splitLine: theme.splitLine,
+          axisLabel: { color: '#64748b' },
+          nameTextStyle: { color: '#64748b' }
         },
-        options: {
-            scales: {
-              yAxes: [{
-                scaleLabel:{
-                  display: true,
-                  labelString: 'ms'
-                },
-                ticks: {
-                  beginAtZero: true
-                }
-              }],
-              xAxes: [{
-                scaleLabel:{
-                  display: true,
-                  labelString: 'loop count'
-                },
-                ticks: {
-                  beginAtZero: true
-                }
-              }]
-            }
+        yAxis: {
+          type: 'value',
+          name: 'ms',
+          nameLocation: 'middle',
+          nameGap: 48,
+          axisLine: theme.axisLine,
+          splitLine: theme.splitLine,
+          axisLabel: { color: '#64748b', formatter: '{value}ms' },
+          nameTextStyle: { color: '#64748b' }
         }
+      };
+    }
+
+    // overview chart — avg per file
+    (function() {
+      var labels = Object.keys(data[files[0]]);
+      var series = files.map(function(file, fi) {
+        var avgs = Object.keys(data[file]).map(function(step) {
+          return calcStats(data[file][step]).avg;
+        });
+        return { name: file, type: 'line', smooth: true, data: avgs, lineStyle: { width: 2 }, itemStyle: { color: palette[fi % palette.length] } };
+      });
+      var opt = baseOption(labels);
+      opt.series = series;
+      echarts.init(document.getElementById('overview')).setOption(opt);
+    })();
+
+    // per-file charts with min/avg/max band + p95 line
+    files.forEach(function(file, fi) {
+      var color = palette[fi % palette.length];
+      var steps = Object.keys(data[file]);
+      var mins = [], avgs = [], maxs = [], p95s = [];
+      steps.forEach(function(step) {
+        var s = calcStats(data[file][step]);
+        mins.push(s.min);
+        avgs.push(s.avg);
+        maxs.push(s.max);
+        p95s.push(s.p95);
+      });
+
+      var id = 'chart-' + fi;
+      var container = document.getElementById('chartsContainer');
+      container.insertAdjacentHTML('beforeend', '<h2>' + file + '</h2><div id="' + id + '" class="chart"></div>');
+
+      var opt = baseOption(steps);
+      opt.series = [
+        // max area top boundary (invisible line)
+        {
+          name: 'max',
+          type: 'line',
+          data: maxs,
+          lineStyle: { opacity: 0 },
+          areaStyle: { color: color, opacity: 0.08 },
+          symbol: 'none',
+          stack: 'band',
+          tooltip: { show: false }
+        },
+        // avg line
+        {
+          name: 'avg',
+          type: 'line',
+          data: avgs,
+          smooth: true,
+          lineStyle: { width: 2, color: color },
+          itemStyle: { color: color },
+          symbol: 'circle',
+          symbolSize: 5
+        },
+        // p95 dashed line
+        {
+          name: 'p95',
+          type: 'line',
+          data: p95s,
+          smooth: true,
+          lineStyle: { width: 2, color: '#f56565', type: 'dashed' },
+          itemStyle: { color: '#f56565' },
+          symbol: 'diamond',
+          symbolSize: 5
+        },
+        // min dashed line
+        {
+          name: 'min',
+          type: 'line',
+          data: mins,
+          smooth: true,
+          lineStyle: { width: 1, color: '#9ae6b4', type: 'dotted' },
+          itemStyle: { color: '#9ae6b4' },
+          symbol: 'none'
+        }
+      ];
+      echarts.init(document.getElementById(id)).setOption(opt);
+    });
+
+    window.addEventListener('resize', function() {
+      echarts.getInstanceByDom(document.getElementById('overview')).resize();
+      files.forEach(function(_, fi) {
+        var el = document.getElementById('chart-' + fi);
+        if(el) { echarts.getInstanceByDom(el).resize(); }
+      });
     });
   </script>
-  </body>
 </body>
 </html>
